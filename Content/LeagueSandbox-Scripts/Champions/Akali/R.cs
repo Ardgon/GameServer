@@ -45,16 +45,23 @@ namespace Spells
             var trueCoords = current + range;
 
             //TODO: Dash to the correct location (in front of the enemy IChampion) instead of far behind or inside them
-            ForceMovement(owner, target, "Spell4", 2200, 0, 0, 0, 20000);
+            //ForceMovement(owner, target, "Spell4", 2200, 0, 0, 0, 20000);
             //ForceMovement(spell.CastInfo.Owner, "Spell4", trueCoords, 2200, 0, 0, 0);
+
+            ForceMovement(owner, target, null, 2200, 0, 0, 0, 20000);
+
             AddParticleTarget(owner, target, "akali_shadowDance_tar.troy", target);
+            ApplyEffects(owner, target, owner.GetSpell("AkaliShadowDance"), null);
+
+
         }
 
         public void ApplyEffects(IObjAiBase owner, IAttackableUnit target, ISpell spell, ISpellMissile missile)
         {
-            var bonusAd = owner.Stats.AttackDamage.Total - owner.Stats.AttackDamage.BaseValue;
-            var ap = owner.Stats.AbilityPower.Total * 0.9f;
-            var damage = 200 + spell.CastInfo.SpellLevel * 150 + bonusAd + ap;
+            //var bonusAd = owner.Stats.AttackDamage.Total - owner.Stats.AttackDamage.BaseValue;
+            var ap = owner.Stats.AbilityPower.Total * 0.5f;
+            //var damage = 200 + spell.CastInfo.SpellLevel * 150 + bonusAd + ap;
+            var damage = 100 + spell.CastInfo.SpellLevel * 75 + ap;
             target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL,
                 DamageSource.DAMAGE_SOURCE_SPELL, false);
         }

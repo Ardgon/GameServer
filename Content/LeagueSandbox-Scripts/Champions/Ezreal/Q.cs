@@ -93,8 +93,8 @@ namespace Spells
         //Vector2 direction;
 
         public void OnActivate(IObjAiBase owner, ISpell spell)
-        {
-            ApiEventManager.OnSpellMissileHit.AddListener(this, new KeyValuePair<ISpell, IObjAiBase>(spell, owner), TargetExecute, true);
+        {            
+            ApiEventManager.OnSpellMissileHit.AddListener(this, new KeyValuePair<ISpell, IObjAiBase>(spell, owner), TargetExecute, false);
         }
 
         public void OnDeactivate(IObjAiBase owner, ISpell spell)

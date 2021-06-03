@@ -1280,6 +1280,11 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits
 
                 var animPairs = new Dictionary<string, string> { { "RUN", "" } };
                 SetAnimStates(animPairs);
+
+                Stats.SetActionState(ActionState.CAN_ATTACK, true);
+                Stats.SetActionState(ActionState.CAN_NOT_ATTACK, false);
+                Stats.SetActionState(ActionState.CAN_MOVE, true);
+                Stats.SetActionState(ActionState.CAN_NOT_MOVE, false);
             }
         }
 
