@@ -11,6 +11,7 @@ using LeagueSandbox.GameServer.API;
 using System.Collections.Generic;
 using GameServerCore.Scripting.CSharp;
 using GameServerCore.Domain.GameObjects.Spell.Sector;
+using LeagueSandbox.GameServer.GameObjects.Stats;
 
 namespace Spells
 {
@@ -38,6 +39,9 @@ namespace Spells
 
         public void OnSpellCast(ISpell spell)
         {
+            var owner = spell.CastInfo.Owner;
+            AddBuff("AkaliTwilightShroudCD", 0.65f, 1, spell, owner, owner);
+            RemoveBuff(owner, "AkaliTwilightShroud");
         }
 
         public void OnSpellPostCast(ISpell spell)
@@ -49,6 +53,7 @@ namespace Spells
                 Type = SectorType.Area
             });
         }
+
         public void TargetExecute(ISpell spell, IAttackableUnit target, ISpellSector sector)
         {
             var owner = spell.CastInfo.Owner;
@@ -85,4 +90,6 @@ namespace Spells
         {
         }
     }
+
+    
 }

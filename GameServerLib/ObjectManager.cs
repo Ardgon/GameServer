@@ -273,10 +273,19 @@ namespace LeagueSandbox.GameServer
             {
                 return false;
             }
-
+            
             if (o.Team == team)
             {
                 return true;
+            }
+
+            var u = o as IAttackableUnit;
+            if (u != null)
+            {
+                if (u.HasBuffType(BuffType.INVISIBILITY))
+                {
+                    return false;
+                }
             }
 
             lock (_objectsLock)
@@ -291,7 +300,7 @@ namespace LeagueSandbox.GameServer
                         {
                             continue;
                         }
-
+      
                         return true;
                     }
                 }

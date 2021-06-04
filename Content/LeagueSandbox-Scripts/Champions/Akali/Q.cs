@@ -39,6 +39,9 @@ namespace Spells
 
         public void OnSpellCast(ISpell spell)
         {
+            var owner = spell.CastInfo.Owner;
+            AddBuff("AkaliTwilightShroudCD", 0.65f, 1, spell, owner, owner);
+            RemoveBuff(owner, "AkaliTwilightShroud");
         }
 
         public void OnSpellPostCast(ISpell spell)

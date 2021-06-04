@@ -20,6 +20,7 @@ namespace Spells
         public void OnActivate(IObjAiBase owner, ISpell spell)
         {
             //TODO: Implement dash listeners
+            
         }
 
         public void OnDeactivate(IObjAiBase owner, ISpell spell)
@@ -32,6 +33,9 @@ namespace Spells
 
         public void OnSpellCast(ISpell spell)
         {
+            var owner = spell.CastInfo.Owner;
+            AddBuff("AkaliTwilightShroudCD", 0.65f, 1, spell, owner, owner);
+            RemoveBuff(owner, "AkaliTwilightShroud");
         }
 
         public void OnSpellPostCast(ISpell spell)
@@ -48,12 +52,10 @@ namespace Spells
             //ForceMovement(owner, target, "Spell4", 2200, 0, 0, 0, 20000);
             //ForceMovement(spell.CastInfo.Owner, "Spell4", trueCoords, 2200, 0, 0, 0);
 
-            ForceMovement(owner, target, null, 2200, 0, 0, 0, 20000);
+            ForceMovement(owner, target, "Spell4", 2200, 0, 0, 0, 20000);
 
             AddParticleTarget(owner, target, "akali_shadowDance_tar.troy", target);
             ApplyEffects(owner, target, owner.GetSpell("AkaliShadowDance"), null);
-
-
         }
 
         public void ApplyEffects(IObjAiBase owner, IAttackableUnit target, ISpell spell, ISpellMissile missile)
@@ -64,6 +66,16 @@ namespace Spells
             var damage = 100 + spell.CastInfo.SpellLevel * 75 + ap;
             target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL,
                 DamageSource.DAMAGE_SOURCE_SPELL, false);
+
+            var MarkAPratio = spell.CastInfo.Owner.Stats.AbilityPower.Total * 0.5f;
+            var MarkDamage = 45 + 25 * (owner.GetSpell("AkaliMota").CastInfo.SpellLevel - 1) + MarkAPratio;
+
+            if (target.HasBuff("AkaliMota"))
+            {
+                target.TakeDamage(owner, MarkDamage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_PROC, false);
+                AddParticleTarget(owner, target, "akali_mark_impact_tar.troy", target, 1f);
+                RemoveBuff(target, "AkaliMota");
+            }
         }
 
         public void OnSpellChannel(ISpell spell)
