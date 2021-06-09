@@ -14,7 +14,7 @@ namespace BantamTrap
 {
     internal class BantamTrap : IBuffGameScript
     {
-        public BuffType BuffType => BuffType.DAMAGE;
+        public BuffType BuffType => BuffType.INVISIBILITY;
         public BuffAddType BuffAddType => BuffAddType.RENEW_EXISTING;
         public int MaxStacks => 1;
         public bool IsHidden => false;

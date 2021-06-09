@@ -8,6 +8,7 @@ using GameServerCore.Enums;
 using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using GameServerCore.Domain.GameObjects.Spell.Sector;
 using System.Collections.Generic;
+using System;
 
 namespace Spells
 {
@@ -51,7 +52,13 @@ namespace Spells
                 _target.TakeDamage(owner, MarkDamage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_PROC, false);
                 AddParticleTarget(owner, _target, "akali_mark_impact_tar.troy", _target, 1f);
                 RemoveBuff(_target, "AkaliMota");
+                owner.Stats.CurrentMana += (15f + (5 * owner.GetSpell(0).CastInfo.SpellLevel));
             }
+
+            // Passive On-Hit
+            float passiveDamagePercent = (6 + (int)Math.Floor(owner.Stats.AbilityPower.TotalBonus / 6)) / 100f;
+            var passiveDamage = owner.Stats.AttackDamage.Total * passiveDamagePercent;
+            _target.TakeDamage(owner, passiveDamage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELL, false);
         }
 
         public void OnSpellCast(ISpell spell)
@@ -119,7 +126,13 @@ namespace Spells
                 _target.TakeDamage(owner, MarkDamage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_PROC, false);
                 AddParticleTarget(owner, _target, "akali_mark_impact_tar.troy", _target, 1f);
                 RemoveBuff(_target, "AkaliMota");
+                owner.Stats.CurrentMana += (15f + (5 * owner.GetSpell(0).CastInfo.SpellLevel));
             }
+
+            // Passive On-Hit
+            float passiveDamagePercent = (6 + (int)Math.Floor(owner.Stats.AbilityPower.TotalBonus / 6)) / 100f;
+            var passiveDamage = owner.Stats.AttackDamage.Total * passiveDamagePercent;
+            _target.TakeDamage(owner, passiveDamage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELL, false);
         }
 
         public void OnSpellCast(ISpell spell)

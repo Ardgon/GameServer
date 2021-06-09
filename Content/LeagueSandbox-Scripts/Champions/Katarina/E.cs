@@ -31,6 +31,8 @@ namespace Spells
 
         public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
         {
+            owner.StopChanneling(ChannelingStopCondition.Cancel, ChannelingStopSource.Move);
+            
             Target = target;
             PlayAnimation(owner, "Spell2");
             if (target.Team != owner.Team)
@@ -66,7 +68,7 @@ namespace Spells
         public void OnSpellPostCast(ISpell spell)
         {
 
-            
+
         }
 
         public void OnSpellChannel(ISpell spell)

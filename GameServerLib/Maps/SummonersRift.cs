@@ -154,6 +154,7 @@ namespace LeagueSandbox.GameServer.Maps
         private int _minionNumber;
         private readonly long _firstSpawnTime = 90 * 1000;
         private long _nextSpawnTime = 90 * 1000;
+        private long _jungleSpawnTime = 90 * 1000;
         private readonly long _spawnInterval = 30 * 1000;
         private readonly Dictionary<TeamId, Fountain> _fountains;
         private readonly Dictionary<TeamId, SurrenderHandler> _surrenders;
@@ -201,6 +202,9 @@ namespace LeagueSandbox.GameServer.Maps
         private readonly List<Inhibitor> _blueInhibitors = new List<Inhibitor>(3);
         private readonly List<Inhibitor> _purpleInhibitors = new List<Inhibitor>(3);
 
+        private Monster[] _jungleMonsters = new Monster[34];
+        private long[] _jungleMonstersNextSpawnTime = new long[34];
+
         private Nexus _blueNexus;
         private Nexus _purpleNexus;
 
@@ -247,6 +251,12 @@ namespace LeagueSandbox.GameServer.Maps
             var nexusRadius = 353;
             var sightRange = 1700;
 
+            // NEUTRAL TEAM
+            for(int i=0; i < _jungleMonstersNextSpawnTime.Length; i++)
+            {
+                _jungleMonstersNextSpawnTime[i] = _jungleSpawnTime;
+            }
+
             //BLUE TEAM
             // Outer top - mid - bot turrets
             _blueOuterTurrets.Add(new LaneTurret(_game, "Turret_T1_L_03_A", "OrderTurretNormal", new Vector2(574.66f, 10220.47f), TeamId.TEAM_BLUE,
@@ -271,18 +281,16 @@ namespace LeagueSandbox.GameServer.Maps
                 TurretType.INHIBITOR_TURRET, GetTurretItems(TurretType.INHIBITOR_TURRET), 0, LaneID.MIDDLE));
             _blueInhibTurrets.Add(new LaneTurret(_game, "Turret_T1_C_07_A", "OrderTurretDragon", new Vector2(3747.26f, 1041.04f), TeamId.TEAM_BLUE,
                 TurretType.INHIBITOR_TURRET, GetTurretItems(TurretType.INHIBITOR_TURRET), 0, LaneID.BOTTOM));
-
             // Inhibitors
             _blueInhibitors.Add(new Inhibitor(_game, "OrderInhibitor", TeamId.TEAM_BLUE, inhibRadius, new Vector2(796.097f, 3339.8077f), sightRange, 0xffd23c3e));
             _blueInhibitors.Add(new Inhibitor(_game, "OrderInhibitor", TeamId.TEAM_BLUE, inhibRadius, new Vector2(2746.097f, 2964.8077f), sightRange, 0xff4a20f1));
             _blueInhibitors.Add(new Inhibitor(_game, "OrderInhibitor", TeamId.TEAM_BLUE, inhibRadius, new Vector2(2996.097f, 1014.8077f), sightRange, 0xff9303e1));
 
             // Nexus turrets
-            _blueNexusTurrets.Add(new LaneTurret(_game, "Turret_T1_C_01_A", "OrderTurretAngel", new Vector2(1271.097f, 1989.8077f), TeamId.TEAM_BLUE,
+            _blueNexusTurrets.Add(new LaneTurret(_game, "Turret_T1_C_01_A", "OrderTurretAngel", new Vector2(1339.8955f, 1987.4297f), TeamId.TEAM_BLUE,
                 TurretType.NEXUS_TURRET, GetTurretItems(TurretType.NEXUS_TURRET)));
-            _blueNexusTurrets.Add(new LaneTurret(_game, "Turret_T1_C_02_A", "OrderTurretAngel", new Vector2(1821.097f, 1589.8077f), TeamId.TEAM_BLUE,
+            _blueNexusTurrets.Add(new LaneTurret(_game, "Turret_T1_C_02_A", "OrderTurretAngel", new Vector2(1774.3601f, 1573.7499f), TeamId.TEAM_BLUE,
                 TurretType.NEXUS_TURRET, GetTurretItems(TurretType.NEXUS_TURRET)));
-
 
             // PURPLE TEAM
             // Outer top - mid - bot turrets
@@ -315,9 +323,9 @@ namespace LeagueSandbox.GameServer.Maps
             _purpleInhibitors.Add(new Inhibitor(_game, "ChaosInhibitor", TeamId.TEAM_PURPLE, inhibRadius, new Vector2(13196.097f, 11164.8077f), sightRange, 0xff26ac0f));
 
             // Nexus turrets
-            _purpleNexusTurrets.Add(new LaneTurret(_game, "Turret_T2_C_01_A", "ChaosTurretNormal", new Vector2(12621.097f, 12364.8077f), TeamId.TEAM_PURPLE,
+            _purpleNexusTurrets.Add(new LaneTurret(_game, "Turret_T2_C_01_A", "ChaosTurretNormal", new Vector2(12665.726f, 12442.175f), TeamId.TEAM_PURPLE,
                 TurretType.NEXUS_TURRET, GetTurretItems(TurretType.NEXUS_TURRET)));
-            _purpleNexusTurrets.Add(new LaneTurret(_game, "Turret_T2_C_02_A", "ChaosTurretNormal", new Vector2(12171.097f, 12789.8077f), TeamId.TEAM_PURPLE,
+            _purpleNexusTurrets.Add(new LaneTurret(_game, "Turret_T2_C_02_A", "ChaosTurretNormal", new Vector2(12125.722f, 12853.498f), TeamId.TEAM_PURPLE,
                 TurretType.NEXUS_TURRET, GetTurretItems(TurretType.NEXUS_TURRET)));
 
             // Fountain turrets
@@ -405,6 +413,33 @@ namespace LeagueSandbox.GameServer.Maps
                     Spawn();
                     _minionNumber++;
                 }
+
+                if (_jungleSpawnTime != 0 && _game.GameTime >= _jungleSpawnTime)
+                {
+                    SpawnJungle();
+                    _jungleSpawnTime = 0;
+                }
+
+
+                // TODO: SET RESPAWN TIME ON DEATH
+                for (int i = 0; i < _jungleMonsters.Length; i++)
+                {
+                    if (_jungleMonsters[i] != null && !_jungleMonsters[i].IsDead)
+                        _jungleMonstersNextSpawnTime[i] = (long)_game.GameTime + GetMonsterSpawnInterval(GetMonsterFromIndex(i).Item1);                    
+                }
+
+                for (int i=0; i < _jungleMonstersNextSpawnTime.Length; i++)
+                {
+                    if (_game.GameTime >= _jungleMonstersNextSpawnTime[i])
+                    {
+                        if (_jungleMonsters[i] != null && !_jungleMonsters[i].IsDead)
+                            continue;
+
+                        var monster = GetMonsterFromIndex(i);
+                        SpawnMonster(monster.Item1, monster.Item2, i);
+                        //_jungleMonstersNextSpawnTime[i] = (long)_game.GameTime + GetMonsterSpawnInterval(monster.Item1);
+                    }
+                }
             }
 
             foreach (var fountain in _fountains.Values)
@@ -450,83 +485,162 @@ namespace LeagueSandbox.GameServer.Maps
             return $"{teamDictionary[team]}_Minion_{typeDictionary[type]}";
         }
 
+        
+        public string GetMonsterModel(MonsterSpawnType type)
+        {
+            var typeDictionary = new Dictionary<MonsterSpawnType, string>
+            {
+                {MonsterSpawnType.MINION_TYPE_BARON, "Worm"},
+                {MonsterSpawnType.MINION_TYPE_DRAGON, "Dragon"},
+                {MonsterSpawnType.MINION_TYPE_GROMP, "SRU_Gromp"},
+                {MonsterSpawnType.MINION_TYPE_ANCIENT_GOLEM, "AncientGolem"},
+                {MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ANCIENT, "YoungLizard"},
+                {MonsterSpawnType.MINION_TYPE_GIANT_WOLF, "GiantWolf"},
+                {MonsterSpawnType.MINION_TYPE_WOLF, "Wolf"},
+                {MonsterSpawnType.MINION_TYPE_WRAITH, "Wraith"},
+                {MonsterSpawnType.MINION_TYPE_LESSER_WRAITH, "LesserWraith"},
+                {MonsterSpawnType.MINION_TYPE_ELDER_LIZARD, "LizardElder"},
+                {MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ELDER, "YoungLizard"},
+                {MonsterSpawnType.MINION_TYPE_GOLEM, "Golem"},
+                {MonsterSpawnType.MINION_TYPE_LESSER_GOLEM, "SmallGolem"},
+            };
+
+            if (!typeDictionary.ContainsKey(type))
+            {
+                return string.Empty;
+            }
+
+            return $"{typeDictionary[type]}";
+        }
+
+        public string GetBuffFor(IAttackableUnit u)
+        { 
+            if (u is IMonster m)
+            {
+                var type = m.MinionSpawnType;
+                switch (type)
+                {
+                    case MonsterSpawnType.MINION_TYPE_ANCIENT_GOLEM:
+                        return "BlueBuff";
+                    case MonsterSpawnType.MINION_TYPE_ELDER_LIZARD:
+                        return "RedBuff";
+                }
+            }
+            return "";
+        }
+
+
         public float GetGoldFor(IAttackableUnit u)
         {
             if (!(u is ILaneMinion m))
             {
-                if (!(u is IChampion c))
+                if (!(u is IMonster s))
                 {
-                    return 0.0f;
-                }
-
-                var gold = 300.0f; //normal gold for a kill
-                if (c.KillDeathCounter < 5 && c.KillDeathCounter >= 0)
-                {
-                    if (c.KillDeathCounter == 0)
+                    if (!(u is IChampion c))
                     {
+                        return 0.0f;
+                    }
+
+                    var gold = 300.0f; //normal gold for a kill
+                    if (c.KillDeathCounter < 5 && c.KillDeathCounter >= 0)
+                    {
+                        if (c.KillDeathCounter == 0)
+                        {
+                            return gold;
+                        }
+
+                        for (var i = c.KillDeathCounter; i > 1; --i)
+                        {
+                            gold += gold * 0.165f;
+                        }
+
                         return gold;
                     }
 
-                    for (var i = c.KillDeathCounter; i > 1; --i)
+                    if (c.KillDeathCounter >= 5)
                     {
-                        gold += gold * 0.165f;
+                        return 500.0f;
                     }
 
-                    return gold;
-                }
+                    if (c.KillDeathCounter >= 0)
+                        return 0.0f;
 
-                if (c.KillDeathCounter >= 5)
-                {
-                    return 500.0f;
-                }
+                    var firstDeathGold = gold - gold * 0.085f;
 
-                if (c.KillDeathCounter >= 0)
-                    return 0.0f;
+                    if (c.KillDeathCounter == -1)
+                    {
+                        return firstDeathGold;
+                    }
 
-                var firstDeathGold = gold - gold * 0.085f;
+                    for (var i = c.KillDeathCounter; i < -1; ++i)
+                    {
+                        firstDeathGold -= firstDeathGold * 0.2f;
+                    }
 
-                if (c.KillDeathCounter == -1)
-                {
+                    if (firstDeathGold < 50)
+                    {
+                        firstDeathGold = 50;
+                    }
+
                     return firstDeathGold;
                 }
-
-                for (var i = c.KillDeathCounter; i < -1; ++i)
-                {
-                    firstDeathGold -= firstDeathGold * 0.2f;
-                }
-
-                if (firstDeathGold < 50)
-                {
-                    firstDeathGold = 50;
-                }
-
-                return firstDeathGold;
             }
 
-            var dic = new Dictionary<MinionSpawnType, float>
+            
+
+            if (u is ILaneMinion mi)
             {
-                { MinionSpawnType.MINION_TYPE_MELEE, 19.8f + 0.2f * (int)(_game.GameTime / (90 * 1000)) },
-                { MinionSpawnType.MINION_TYPE_CASTER, 16.8f + 0.2f * (int)(_game.GameTime / (90 * 1000)) },
-                { MinionSpawnType.MINION_TYPE_CANNON, 40.0f + 0.5f * (int)(_game.GameTime / (90 * 1000)) },
-                { MinionSpawnType.MINION_TYPE_SUPER, 40.0f + 1.0f * (int)(_game.GameTime / (180 * 1000)) }
+                   var dic = new Dictionary<MinionSpawnType, float>
+                {
+                    { MinionSpawnType.MINION_TYPE_MELEE, 19.8f + 0.2f * (int)(_game.GameTime / (90 * 1000)) },
+                    { MinionSpawnType.MINION_TYPE_CASTER, 16.8f + 0.2f * (int)(_game.GameTime / (90 * 1000)) },
+                    { MinionSpawnType.MINION_TYPE_CANNON, 40.0f + 0.5f * (int)(_game.GameTime / (90 * 1000)) },
+                    { MinionSpawnType.MINION_TYPE_SUPER, 40.0f + 1.0f * (int)(_game.GameTime / (180 * 1000)) }
+                };
+
+                if (!dic.ContainsKey(mi.MinionSpawnType))
+                {
+                    return 0.0f;
+                }
+
+                return dic[mi.MinionSpawnType];
+            }
+
+            else if (u is IMonster mo)
+            {
+                var dic = new Dictionary<MonsterSpawnType, float>
+            {
+                { MonsterSpawnType.MINION_TYPE_WRAITH, 35.0f },
+                { MonsterSpawnType.MINION_TYPE_LESSER_WRAITH, 4.0f },
+                { MonsterSpawnType.MINION_TYPE_GIANT_WOLF, 40.0f },
+                { MonsterSpawnType.MINION_TYPE_WOLF, 8.0f },
+                { MonsterSpawnType.MINION_TYPE_GOLEM, 55.0f },
+                { MonsterSpawnType.MINION_TYPE_LESSER_GOLEM, 15.0f },
+                { MonsterSpawnType.MINION_TYPE_GROMP, 65.0f },
+                { MonsterSpawnType.MINION_TYPE_ANCIENT_GOLEM, 60.0f },
+                { MonsterSpawnType.MINION_TYPE_ELDER_LIZARD, 60.0f },
+                { MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ANCIENT, 7.0f },
+                { MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ELDER, 7.0f },
+                { MonsterSpawnType.MINION_TYPE_DRAGON, 150.0f },
+                { MonsterSpawnType.MINION_TYPE_BARON, 320.0f },
             };
 
-            if (!dic.ContainsKey(m.MinionSpawnType))
-            {
-                return 0.0f;
+                if (!dic.ContainsKey(mo.MinionSpawnType))
+                {
+                    return 0.0f;
+                }
+
+                return dic[mo.MinionSpawnType];
             }
 
-            return dic[m.MinionSpawnType];
+            return 0.0f;
         }
 
         public float GetExperienceFor(IAttackableUnit u)
         {
-            if (!(u is ILaneMinion m))
+            if ((u is ILaneMinion m))
             {
-                return 0.0f;
-            }
-
-            var dic = new Dictionary<MinionSpawnType, float>
+                var dic = new Dictionary<MinionSpawnType, float>
             {
                 { MinionSpawnType.MINION_TYPE_MELEE, 64.0f },
                 { MinionSpawnType.MINION_TYPE_CASTER, 32.0f },
@@ -534,12 +648,99 @@ namespace LeagueSandbox.GameServer.Maps
                 { MinionSpawnType.MINION_TYPE_SUPER, 97.0f }
             };
 
-            if (!dic.ContainsKey(m.MinionSpawnType))
-            {
-                return 0.0f;
+                if (!dic.ContainsKey(m.MinionSpawnType))
+                {
+                    return 0.0f;
+                }
+
+                return dic[m.MinionSpawnType];
             }
 
-            return dic[m.MinionSpawnType];
+            else if ((u is IMonster mo))
+            {
+                var dic = new Dictionary<MonsterSpawnType, float>
+            {
+                { MonsterSpawnType.MINION_TYPE_WRAITH, 90.0f },
+                { MonsterSpawnType.MINION_TYPE_LESSER_WRAITH, 20.0f },
+                { MonsterSpawnType.MINION_TYPE_GIANT_WOLF, 110.0f },
+                { MonsterSpawnType.MINION_TYPE_WOLF, 25.0f },
+                { MonsterSpawnType.MINION_TYPE_GOLEM, 140.0f },
+                { MonsterSpawnType.MINION_TYPE_LESSER_GOLEM, 40.0f },
+                { MonsterSpawnType.MINION_TYPE_GROMP, 150.0f },
+                { MonsterSpawnType.MINION_TYPE_ANCIENT_GOLEM, 260.0f },
+                { MonsterSpawnType.MINION_TYPE_ELDER_LIZARD, 260.0f },
+                { MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ANCIENT, 20.0f },
+                { MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ELDER, 20.0f },
+                { MonsterSpawnType.MINION_TYPE_BARON, 900.0f },
+                { MonsterSpawnType.MINION_TYPE_DRAGON, 150.0f },
+            };
+
+                if (!dic.ContainsKey(mo.MinionSpawnType))
+                {
+                    return 0.0f;
+                }
+
+                return dic[mo.MinionSpawnType];
+            }
+
+            return 0.0f;
+        }
+
+        public List<Vector2> GetMonsterSpawnPosition(MonsterSpawnType monsterType)
+        {
+            switch (monsterType)
+            {
+                case MonsterSpawnType.MINION_TYPE_ELDER_LIZARD:
+                    return new List<Vector2>() { new Vector2(7465.434f, 3921.3438f), new Vector2(6523.898f, 10504.402f), };
+                case MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ELDER:
+                    return new List<Vector2>() { new Vector2(7301.891f, 3939.5444f), new Vector2(7510.9663f, 3809.5908f), new Vector2(6736.2334f, 10514.005f), new Vector2(6549.071f, 10735.53f), };
+                case MonsterSpawnType.MINION_TYPE_ANCIENT_GOLEM:
+                    return new List<Vector2>() { new Vector2(3653.434f, 7617.3438f), new Vector2(10493.184f, 6763.5405f), };
+                case MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ANCIENT:
+                    return new List<Vector2>() { new Vector2(3425.434f, 7589.3438f), new Vector2(3527.434f, 7815.3438f), new Vector2(10654.244f, 6821.699f), new Vector2(10525.28f, 6662.5273f), };
+                case MonsterSpawnType.MINION_TYPE_GIANT_WOLF:
+                    return new List<Vector2>() { new Vector2(3397.8608f, 6271.993f), new Vector2(10630.8f, 8164.3228f), };
+                case MonsterSpawnType.MINION_TYPE_WOLF:
+                    return new List<Vector2>() { new Vector2(3385.434f, 6431.3438f), new Vector2(3586.67f, 6237.8965f), new Vector2(10505.131f, 8224.73f), new Vector2(10684.68f, 8089.6265f), };
+                case MonsterSpawnType.MINION_TYPE_GROMP:
+                    return new List<Vector2>() { new Vector2(1809.4341f, 8177.3438f), new Vector2(12191.434f, 6213.3438f), };
+                case MonsterSpawnType.MINION_TYPE_WRAITH:
+                    return new List<Vector2>() { new Vector2(6473.434f, 5283.3438f), new Vector2(7562.0127f, 9189.633f), };
+                case MonsterSpawnType.MINION_TYPE_LESSER_WRAITH:
+                    return new List<Vector2>() { new Vector2(6643.3794f, 5292.1284f), new Vector2(6599.2563f, 5119.364f), new Vector2(6443.434f, 5197.3438f), new Vector2(7419.434f, 9111.344f), new Vector2(7361.434f, 9261.344f), new Vector2(7538.852f, 9307.1455f), };
+                case MonsterSpawnType.MINION_TYPE_GOLEM:
+                    return new List<Vector2>() { new Vector2(7899.434f, 2557.3438f), new Vector2(6055.785f, 11905.778f), };
+                case MonsterSpawnType.MINION_TYPE_LESSER_GOLEM:
+                    return new List<Vector2>() { new Vector2(8097.3843f, 2561.5012f), new Vector2(5879.59f, 11880.846f), };
+                case MonsterSpawnType.MINION_TYPE_DRAGON:
+                    return new List<Vector2>() { new Vector2(9430.364f, 4184.46f), };
+                case MonsterSpawnType.MINION_TYPE_BARON:
+                    return new List<Vector2>() { new Vector2(4591.434f, 10215.344f), };
+            }
+
+            return new List<Vector2>() {}; ;
+        }
+
+        public int GetMonsterSpawnInterval(MonsterSpawnType monsterType)
+        {
+            switch (monsterType)
+            {
+                case MonsterSpawnType.MINION_TYPE_ELDER_LIZARD:
+                    return 300 * 1000;
+                case MonsterSpawnType.MINION_TYPE_ANCIENT_GOLEM:
+                    return 300 * 1000;
+                case MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ELDER:
+                    return 300 * 1000;
+                case MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ANCIENT:
+                    return 300 * 1000;
+                case MonsterSpawnType.MINION_TYPE_DRAGON:
+                    return 360 * 1000;
+                case MonsterSpawnType.MINION_TYPE_BARON:
+                    return 420 * 1000;
+                default:
+                    return 50 * 1000;
+            }
+            return 0;
         }
 
         public Tuple<TeamId, Vector2> GetMinionSpawnPosition(string spawnPosition)
@@ -603,7 +804,7 @@ namespace LeagueSandbox.GameServer.Maps
                     break;
             }
         }
-
+        
         public void SpawnMinion(List<MinionSpawnType> list, int minionNo, string barracksName, List<Vector2> waypoints)
         {
             if (list.Count <= minionNo)
@@ -616,8 +817,60 @@ namespace LeagueSandbox.GameServer.Maps
             _game.ObjectManager.AddObject(m);
         }
 
-        public bool Spawn()
+        // TODO: Add monster facing position
+        public void SpawnMonster(MonsterSpawnType monsterType, Vector2 position, int monsterIndex)
         {
+            var m = new Monster(
+                _game,
+                position,
+                position,
+                monsterType,
+                GetMonsterModel(monsterType),
+                GetMonsterModel(monsterType)
+            );
+
+            _game.ObjectManager.AddObject(m);
+            _jungleMonsters[monsterIndex] = m;
+        }
+
+        public void SpawnJungle()
+        {
+            int i = 0;
+            foreach (MonsterSpawnType monsterType in Enum.GetValues(typeof(MonsterSpawnType)))
+            {
+                foreach (Vector2 pos in GetMonsterSpawnPosition(monsterType))
+                {
+                    if (_jungleMonsters[i] != null && !_jungleMonsters[i].IsDead)
+                    {
+                        i++;
+                        continue;
+                    }
+                    SpawnMonster(monsterType, pos, i);
+                    i++;
+                }
+            }
+        }
+
+        public Tuple<MonsterSpawnType, Vector2>? GetMonsterFromIndex(int monsterIndex)
+        {
+            int i = 0;
+            foreach (MonsterSpawnType monsterType in Enum.GetValues(typeof(MonsterSpawnType)))
+            {
+                foreach (Vector2 pos in GetMonsterSpawnPosition(monsterType))
+                {
+                    if (i == monsterIndex)
+                    {
+                        return new Tuple<MonsterSpawnType, Vector2>(monsterType, pos);
+                    }
+                    i++;
+                }
+            }
+            return null;
+        }
+
+        public bool Spawn()
+        {                   
+
             var barracks = new List<string>
             {
                 Barracks.SPAWN_BLUE_TOP,
@@ -704,6 +957,8 @@ namespace LeagueSandbox.GameServer.Maps
             }
             return true;
         }
+
+        
 
         public Vector3 GetEndGameCameraPosition(TeamId team)
         {

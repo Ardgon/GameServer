@@ -4,20 +4,23 @@ using GameServerCore.Domain.GameObjects.Spell;
 using GameServerCore.Domain.GameObjects.Spell.Missile;
 using System.Numerics;
 using GameServerCore.Scripting.CSharp;
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 namespace Spells
 {
     public class AkaliTwinDisciplines : ISpellScript
     {
+        IObjAiBase _owner;
+        float _prevModifier;
         public ISpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
         {
+            TriggersSpellCasts = true
             // TODO
         };
 
         public void OnActivate(IObjAiBase owner, ISpell spell)
         {
-            var bonusAd = owner.Stats.AttackDamage.Total - owner.Stats.AttackDamage.BaseValue;
-            owner.Stats.SpellVamp.PercentBonus = 6 + bonusAd % 6;
+            _owner = owner;
         }
 
         public void OnDeactivate(IObjAiBase owner, ISpell spell)
@@ -51,6 +54,7 @@ namespace Spells
 
         public void OnUpdate(float diff)
         {
+            
         }
     }
 }

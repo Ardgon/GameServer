@@ -5,7 +5,8 @@ using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 using LeagueSandbox.GameServer.Scripting.CSharp;
 using System.Numerics;
 using GameServerCore.Scripting.CSharp;
-
+using LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI;
+using System;
 
 namespace Spells
 {
@@ -13,6 +14,7 @@ namespace Spells
     {
         public ISpellScriptMetadata ScriptMetadata => new SpellScriptMetadata()
         {
+            TriggersSpellCasts = true,
             // TODO
         };
 
@@ -35,6 +37,9 @@ namespace Spells
 
         public void OnSpellPostCast(ISpell spell)
         {
+            // TODO: Remove item without selling
+            var champion = spell.CastInfo.Owner as Champion;
+            champion.Shop.HandleItemSellRequest(Convert.ToByte(spell.CastInfo.SpellSlot - 6));
         }
 
         public void OnSpellChannel(ISpell spell)

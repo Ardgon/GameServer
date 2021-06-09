@@ -207,7 +207,7 @@ namespace LeagueSandbox.GameServer.GameObjects.Spell.Missile
         /// <returns>True/False.</returns>
         public bool HasTarget()
         {
-            return TargetUnit != null;
+            return TargetUnit != null && !TargetUnit.IsDead;
         }
 
         /// <summary>

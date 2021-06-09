@@ -68,6 +68,7 @@ namespace Spells
                 target.TakeDamage(owner, MarkDamage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_PROC, false);
                 AddParticleTarget(owner, target, "akali_mark_impact_tar.troy", target, 1f);
                 RemoveBuff(target, "AkaliMota");
+                owner.Stats.CurrentMana += (15f + (5 * owner.GetSpell(0).CastInfo.SpellLevel));
             }
             target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_PHYSICAL, DamageSource.DAMAGE_SOURCE_SPELLAOE, false);
             AddParticleTarget(owner, target, "akali_shadowSwipe_tar.troy", target, 1f);

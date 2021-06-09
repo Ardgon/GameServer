@@ -78,13 +78,6 @@ namespace Spells
 
                         units[i].TakeDamage(spell.CastInfo.Owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELL, false);
 
-                        if (units[i].IsDead && (units[i] is IChampion))
-                        {
-                            var buffer = owner.Stats.AbilityPower.FlatBonus;
-
-                            statsModifier.AbilityPower.FlatBonus = owner.Stats.AbilityPower.FlatBonus + StacksPerLevel - buffer;
-                            owner.AddStatModifier(statsModifier);
-                        }
                     }
                 }
                 string particles2;

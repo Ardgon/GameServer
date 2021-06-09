@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using GameServerCore.Domain.GameObjects;
 using GameServerCore.Enums;
 using LeagueSandbox.GameServer.GameObjects.Stats;
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
 {
@@ -62,27 +64,133 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
 
         public override void Update(float diff)
         {
+            _actionDelay -= diff;
             base.Update(diff);
+            _timeTargetting += diff / 1000.0f;
         }
 
+        float _timeTargetting = 0f;
+        float _actionDelay = 0.25f * 1000f;
+
+
+        // TODO: Temporarily stop considering tarrget if failed to attack it for 4 seconds,
+        // process calls for help without action delay, stop chasing if minions walks too far from lane
         public override bool AIMove()
         {
+
+            // TODO: Process calls for help here, outside of action delay.
+
+            // Minions take action on set timers to avoid overwhelming servers
+            if (_actionDelay > 0)
+            { 
+                return false;  // TODO: verify what true/false means for AIMove
+            }
+            
+            _actionDelay = 0.25f * 1000f;
+
+
             // TODO: Use unique LaneMinion AI instead of normal Minion AI and add here for return values.
-            if (ScanForTargets()) // returns true if we have a target
+            if (CanAttack() && ScanForTargets()) // returns true if we have a target
             {
                 if (!RecalculateAttackPosition())
                 {
-                    KeepFocusingTarget(); // attack/follow target
-                }
+                        KeepFocusingTarget(); // attack/follow target
+                } 
                 return false;
             }
+            //else
+            //{
+                //SetTargetUnit(null, true);
+                //CancelAutoAttack(false);
+            //}
 
             // If we have lane path instructions from the map
-            if (_mainWaypoints.Count > 0 && TargetUnit == null)
+            if (_mainWaypoints.Count > 0 && (TargetUnit == null || TargetUnit.IsDead) && CanMove())
             {
+                SetTargetUnit(null, true);
+                CancelAutoAttack(true);
                 WalkToDestination();
             }
             return true;
+
+        }
+
+        public override void OnCollision(IGameObject collider, bool isTerrain = false)
+        {
+            base.OnCollision(collider, isTerrain);
+        }
+
+
+        override public bool ScanForTargets()
+        {
+
+            //if (TargetUnit != null && !TargetUnit.IsDead)
+            //{
+            //    return true;
+            //}
+            IAttackableUnit nextTarget = null;
+            var nextTargetPriority = 14;
+            var nearestObjects = _game.Map.CollisionHandler.QuadDynamic.GetObjects();
+            //Find target closest to max attack range.
+
+            var priority = 99;
+            foreach (var it in nearestObjects.OrderBy(x => Vector2.DistanceSquared(Position, x.Position) - (DETECT_RANGE * DETECT_RANGE)))
+            {
+                if (!(it is IAttackableUnit u) ||
+                    u.IsDead ||
+                    u.Team == Team ||
+                    //Vector2.DistanceSquared(Position, u.Position) > DETECT_RANGE * DETECT_RANGE ||
+                    !_game.ObjectManager.TeamHasVisionOn(Team, u))
+                {
+                    continue;
+                }
+
+                if (Vector2.DistanceSquared(Position, u.Position) > DETECT_RANGE * DETECT_RANGE)
+                {
+                    break;
+                }
+
+                priority = (int)ClassifyTarget(u);  // get the priority.
+
+                if (priority < nextTargetPriority) // if the priority is lower than the target we checked previously
+                {
+                    nextTarget = u;                // make it a potential target.
+                    nextTargetPriority = priority;
+                }
+
+                if (priority == nextTargetPriority)
+                {
+                    //TODO: pick based on cheapest path
+                }
+            }
+
+            if (TargetUnit != null && !TargetUnit.IsDead)
+            {
+                // Call for help priority
+                if (priority < 6)
+                {
+                    //CancelAutoAttack(false);
+                    SetTargetUnit(nextTarget, true);
+                    return true;
+                }                
+            }
+
+
+            if (nextTarget != null) // If we have a new target
+            {
+                // Set the new target and refresh waypoints
+                if (TargetUnit != null && nextTarget.NetId != TargetUnit.NetId)
+                {
+                    //CancelAutoAttack(false);
+                    SetTargetUnit(nextTarget, true);
+                } else
+                {
+                    SetTargetUnit(nextTarget, true);
+                }
+                return true;
+            } 
+
+            return false;
         }
 
         public void WalkToDestination()
@@ -107,7 +215,7 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
                 {
                     path = tempPath;
                 }
-
+   
                 SetWaypoints(path);
                 UpdateMoveOrder(OrderType.MoveTo);
 

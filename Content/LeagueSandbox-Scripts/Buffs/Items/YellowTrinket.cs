@@ -11,7 +11,7 @@ namespace YellowTriket
 {
     internal class YellowTriket : IBuffGameScript
     {
-        public BuffType BuffType => BuffType.INTERNAL;
+        public BuffType BuffType => BuffType.INVISIBILITY;
         public BuffAddType BuffAddType => BuffAddType.STACKS_AND_CONTINUE;
         public int MaxStacks => 1;
         public bool IsHidden => true;
@@ -36,7 +36,7 @@ namespace YellowTriket
         public void OnUpdate(float diff)
         {
             timeSinceLastTick += diff;
-
+            
             if(timeSinceLastTick >= 60000.0f)
             {
                 Unit.Die(Unit);

@@ -37,6 +37,7 @@ namespace Spells
 
         public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
         {
+            owner.StopChanneling(ChannelingStopCondition.Cancel, ChannelingStopSource.Move);
             spell.CreateSpellSector(new SectorParameters
             {
                 HalfLength = 400f,

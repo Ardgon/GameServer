@@ -4,16 +4,19 @@ using LeagueSandbox.GameServer.Scripting.CSharp;
 using System.Numerics;
 using LeagueSandbox.GameServer.API;
 using GameServerCore.Scripting.CSharp;
-
+using static LeagueSandbox.GameServer.API.ApiFunctionManager;
+using GameServerCore.Enums;
 
 namespace Spells
 {
-    public class KatarinaBasicAttack : ISpellScript
+    public class VeigarBasicAttack : ISpellScript
     {
         public ISpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
-            TriggersSpellCasts = true
-            // TODO
+            MissileParameters = new MissileParameters
+            {
+                Type = MissileType.Target
+            }
         };
 
         public void OnActivate(IObjAiBase owner, ISpell spell)
@@ -27,11 +30,12 @@ namespace Spells
         public void OnSpellPreCast(IObjAiBase owner, ISpell spell, IAttackableUnit target, Vector2 start, Vector2 end)
         {
             ApiEventManager.OnLaunchAttack.AddListener(this, owner, OnLaunchAttack, false);
+
+            
         }
 
         public void OnLaunchAttack(ISpell spell)
         {
-            spell.CastInfo.Owner.SetAutoAttackSpell("KatarinaBasicAttack2", false);
         }
 
         public void OnSpellCast(ISpell spell)
@@ -59,13 +63,14 @@ namespace Spells
         }
     }
 
-    public class KatarinaBasicAttack2 : ISpellScript
+    public class VeigarBasicAttack2 : ISpellScript
     {
         public ISpellScriptMetadata ScriptMetadata { get; private set; } = new SpellScriptMetadata()
         {
-            TriggersSpellCasts = true
-
-            // TODO
+            MissileParameters = new MissileParameters
+            {
+                Type = MissileType.Target
+            }
         };
 
         public void OnActivate(IObjAiBase owner, ISpell spell)
@@ -83,7 +88,6 @@ namespace Spells
 
         public void OnLaunchAttack(ISpell spell)
         {
-            spell.CastInfo.Owner.SetAutoAttackSpell("KatarinaBasicAttack", false);
         }
 
         public void OnSpellCast(ISpell spell)

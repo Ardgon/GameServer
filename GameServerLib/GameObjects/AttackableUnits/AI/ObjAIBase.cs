@@ -304,6 +304,7 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
         /// TODO: Move to AttackableUnit.
         public ClassifyUnit ClassifyTarget(IAttackableUnit target)
         {
+            // TODO: Calls for help should be sent to all units in range so that it can be processed separately rather than only considering distress while a unit is targetted.
             if (target is IObjAiBase ai && ai.TargetUnit != null && (ai.TargetUnit.Team == Team && ai.TargetUnit.IsInDistress())) // If an ally is in distress, target this unit. (Priority 1~5)
             {
                 switch (target)
@@ -373,18 +374,18 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
         public override void OnCollision(IGameObject collider, bool isTerrain = false)
         {
             // If we were trying to path somewhere before colliding, then repath from our new position.
-            if (!IsPathEnded())
-            {
-                List<Vector2> safePath = _game.Map.NavigationGrid.GetPath(Position, _game.Map.NavigationGrid.GetClosestTerrainExit(Waypoints.Last()));
+            //if (!IsPathEnded())
+            //{
+            //    List<Vector2> safePath = _game.Map.NavigationGrid.GetPath(Position, _game.Map.NavigationGrid.GetClosestTerrainExit(Waypoints.Last()));
 
-                // TODO: When using this safePath, sometimes we collide with the terrain again, so we use an unsafe path the next collision, however,
-                // sometimes we collide again before we can finish the unsafe path, so we end up looping collisions between safe and unsafe paths, never actually escaping (ex: sharp corners).
-                // Edit the current method to fix the above problem.
-                if (safePath != null)
-                {
-                    SetWaypoints(safePath);
-                }
-            }
+            //    // TODO: When using this safePath, sometimes we collide with the terrain again, so we use an unsafe path the next collision, however,
+            //    // sometimes we collide again before we can finish the unsafe path, so we end up looping collisions between safe and unsafe paths, never actually escaping (ex: sharp corners).
+            //    // Edit the current method to fix the above problem.
+            //    if (safePath != null)
+            //    {
+            //        SetWaypoints(safePath);
+            //    }
+            //}
 
             base.OnCollision(collider, isTerrain);
         }
@@ -486,7 +487,12 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
         public bool RecalculateAttackPosition()
         {
             // If we are already where we should be, which means we are in attack range, then keep our current position.
-            if (TargetUnit == null || TargetUnit.IsDead || Vector2.DistanceSquared(Position, TargetUnit.Position) <= Stats.Range.Total * Stats.Range.Total)
+            //if (TargetUnit == null || TargetUnit.IsDead || Vector2.DistanceSquared(Position, TargetUnit.Position) <= Stats.Range.Total * Stats.Range.Total)
+            //{
+            //    return false;
+            //}
+
+            if (TargetUnit == null || TargetUnit.IsDead)
             {
                 return false;
             }
@@ -511,7 +517,8 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
                 if (GameServerCore.Extensions.IsVectorWithinRange(closestPoint, Position, CollisionRadius))
                 {
                     var exitPoint = GameServerCore.Extensions.GetCircleEscapePoint(Position, CollisionRadius + 1, gameObject.Position, gameObject.CollisionRadius);
-                    SetWaypoints(new List<Vector2> { Position, exitPoint });
+                    //SetWaypoints(new List<Vector2> { Position, exitPoint });
+                    TeleportTo(exitPoint.X, exitPoint.Y);
                     return true;
                 }
             }
@@ -543,24 +550,24 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
                 return;
             }
 
-            if (MoveOrder == OrderType.AttackMove
-                || MoveOrder == OrderType.AttackTo
-                || MoveOrder == OrderType.AttackTerrainOnce
-                || MoveOrder == OrderType.AttackTerrainSustained)
-            {
-                idealRange = Stats.Range.Total;
-            }
+            //if (MoveOrder == OrderType.AttackMove
+            //    || MoveOrder == OrderType.AttackTo
+            //    || MoveOrder == OrderType.AttackTerrainOnce
+            //    || MoveOrder == OrderType.AttackTerrainSustained)
+            //{
+            //    idealRange = Stats.Range.Total;
+            //}
 
             if (MoveOrder != OrderType.AttackTo && TargetUnit != null)
             {
                 UpdateMoveOrder(OrderType.AttackTo, true);
-                idealRange = Stats.Range.Total;
+                //idealRange = Stats.Range.Total;
             }
 
-            if (SpellToCast != null)
-            {
-                idealRange = SpellToCast.GetCurrentCastRange();
-            }
+            //if (SpellToCast != null)
+            //{
+            //    idealRange = SpellToCast.GetCurrentCastRange();
+            //}
 
             Vector2 targetPos = Vector2.Zero;
 
@@ -586,6 +593,7 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
                     return;
                 }
             }
+
 
             // If the target is already in range, stay where we are.
             if (MoveOrder == OrderType.AttackMove && targetPos != Vector2.Zero)
@@ -649,10 +657,11 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
                 });
                 return critAttackSpells.ElementAt(_random.Next(0, Math.Max(0, critAttackSpells.Count() - 1))).Value;
             }
+            
             // TODO: Verify if we want these explicitly defined instead of taken via iteration of all spells.
             var basicAttackSpells = Spells.Where(s =>
             {
-                if (s.Key - 64 >= 0 && s.Key - 64 < 9)
+                if (s.Key - 64 >= 0 && s.Key - 64 <= 9)
                 {
                     if (CharData.AttackProbabilities[s.Key - 64] > 0.0f)
                     {
@@ -661,6 +670,7 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
                 }
                 return false;
             });
+
             return basicAttackSpells.ElementAt(_random.Next(0, Math.Max(0, basicAttackSpells.Count() - 1))).Value;
         }
 
@@ -949,15 +959,16 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
                 return;
             }
 
-            if (MovementParameters != null)
-            {
-                RefreshWaypoints(0);
-                return;
-            }
 
             var idealRange = Stats.Range.Total;
 
-            if (TargetUnit is IObjBuilding)
+            if (MovementParameters != null)
+            {
+                RefreshWaypoints(idealRange);
+                return;
+            }
+
+            if (TargetUnit is IObjBuilding || TargetUnit is IBaseTurret)
             {
                 idealRange = Stats.Range.Total + TargetUnit.CollisionRadius;
             }
@@ -1023,7 +1034,8 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
                         if (AutoAttackSpell.State == SpellState.STATE_READY)
                         {
                             // Stops us from continuing to move towards the target.
-                            RefreshWaypoints(Stats.Range.Total);
+                            //RefreshWaypoints(Stats.Range.Total);
+                            RefreshWaypoints(idealRange);
 
                             if (CanAttack())
                             {

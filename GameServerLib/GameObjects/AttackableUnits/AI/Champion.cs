@@ -262,7 +262,17 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
                     ChampStats.NeutralMinionsKilled += 1;
                 }
 
+                // TODO: Move to red/blue buff itself and transfer it to killer, give an infinite version of the buff to the jungle monsters
+                var buffName = _game.Map.MapProperties.GetBuffFor(killed);
+                
+                if (buffName != "")
+                {
+                    var buff = new Buff(_game, buffName, 150f, 1, Spells[1], this, this, false);
+                    AddBuff(buff);
+                }
+
                 var gold = _game.Map.MapProperties.GetGoldFor(killed);
+
                 if (gold <= 0)
                 {
                     return;
@@ -270,6 +280,7 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
 
                 Stats.Gold += gold;
                 _game.PacketNotifier.NotifyAddGold(this, killed, gold);
+                
 
                 if (KillDeathCounter < 0)
                 {
@@ -352,7 +363,7 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
 
             _game.ObjectManager.StopTargeting(this);
         }
-
+        
         public override void OnCollision(IGameObject collider, bool isTerrain = false)
         {
             // TODO: Pathfinding should be responsible for pathing around units so collisions with other units never occur (or at least very little).
@@ -363,6 +374,9 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
             }
 
             base.OnCollision(collider, isTerrain);
+
+            return;
+
             if (isTerrain)
             {
                 //CORE_INFO("I bumped into a wall!");
@@ -390,6 +404,16 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
         public void UpdateSkin(int skinNo)
         {
             Skin = skinNo;
+        }
+
+        public void StealthEnter()
+        {
+            _game.PacketNotifier.NotifyTransparency(this, 0.5f, 0.0f);
+        }
+
+        public void StealthExit()
+        {
+            _game.PacketNotifier.NotifyTransparency(this, 1f, 0.0f);
         }
     }
 }

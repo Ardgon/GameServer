@@ -201,8 +201,8 @@ namespace PacketDefinitions420
                 targetPacket.TargetNetID = target.NetId;
             }
 
-            // TODO: Verify if we need to account for other cases.
-            if (attacker is IBaseTurret)
+            // TODO: Verify if we need to account for other cases. (most likely don't want to send mosnter packets to unseen objects either).
+            if (attacker is IBaseTurret || attacker is IMonster)
             {
                 _packetHandlerManager.BroadcastPacket(targetPacket.GetBytes(), Channel.CHL_S2C);
             }
@@ -538,7 +538,8 @@ namespace PacketDefinitions420
         }
 
         /// <summary>
-        /// Sends a packet to all players with vision of a specified ObjAiBase explaining that their specified spell's cooldown has been set.
+        /// Sends a packet to all players with vision of a specified ObjAiBase explaining that their specified spell's 
+        /// has been set.
         /// </summary>
         /// <param name="u">ObjAiBase who owns the spell going on cooldown.</param>
         /// <param name="slotId">Slot of the spell.</param>
@@ -559,6 +560,27 @@ namespace PacketDefinitions420
             {
                 cdPacket.IsSummonerSpell = true; // TODO: Verify functionality
             }
+            _packetHandlerManager.BroadcastPacketVision(u, cdPacket.GetBytes(), Channel.CHL_S2C);
+        }
+
+        public void S2C_AmmoUpdate(IObjAiBase u, byte slotId, int currentAmmo, int maxAmmo, float ammoRecharge, float ammoRechargeTotalTime)
+        {
+
+            var cdPacket = new S2C_AmmoUpdate
+            {
+                SenderNetID = u.NetId,
+                SpellSlot = slotId,
+                CurrentAmmo = currentAmmo,
+                MaxAmmo = maxAmmo,
+                AmmoRecharge = ammoRecharge,
+                AmmoRechargeTotalTime = ammoRechargeTotalTime,
+                IsSummonerSpell = false, 
+            };
+
+            //if (u is IChampion && (slotId == 4 || slotId == 5))
+            //{
+            //    cdPacket.IsSummonerSpell = true; // TODO: Verify functionality
+            //}
             _packetHandlerManager.BroadcastPacketVision(u, cdPacket.GetBytes(), Channel.CHL_S2C);
         }
 
@@ -1505,7 +1527,8 @@ namespace PacketDefinitions420
         public void NotifyMonsterSpawned(IMonster m)
         {
             var sp = new SpawnMonster(_navGrid, m);
-            _packetHandlerManager.BroadcastPacketVision(m, sp, Channel.CHL_S2C);
+            _packetHandlerManager.BroadcastPacket(sp.GetBytes(), Channel.CHL_S2C);
+
         }
 
         /// <summary>
@@ -1904,6 +1927,13 @@ namespace PacketDefinitions420
                 IsSummonerSpell = isSummonerSpell,
                 ForceDoClient = forceClient
             };
+
+            // TODO: Verify if we want to send packets from unseen monsters (maybe send packets when they come into vision).
+            if (attacker is IMonster)
+            {
+                _packetHandlerManager.BroadcastPacket(stopAttack.GetBytes(), Channel.CHL_S2C);
+            }
+
             _packetHandlerManager.BroadcastPacketVision(attacker, stopAttack.GetBytes(), Channel.CHL_S2C);
         }
 
@@ -2474,6 +2504,17 @@ namespace PacketDefinitions420
                     break;
                 case IMinion minion:
                     NotifyMinionSpawned(minion);
+                    if (minion.IsWard)
+                    {
+                        NotifyAddRegion
+                        (
+                            0, minion.Team, minion.Position,
+                            60.0f, 800.0f, -2,
+                            null, minion, minion.CharData.PathfindingCollisionRadius,
+                            130.0f, 1.0f, 0,
+                            true, false
+                        );
+                    }
                     break;
                 case IAzirTurret azirTurret:
                     NotifyAzirTurretSpawned(azirTurret);
@@ -2896,6 +2937,18 @@ namespace PacketDefinitions420
             };
 
             _packetHandlerManager.BroadcastPacketVision(u, speedWpGroup.GetBytes(), Channel.CHL_S2C);
+        }
+
+        public void NotifyTransparency(IAttackableUnit u, float transparency, float transitionTime)
+        {
+            var transparent = new SetModelTransparency(u, transparency, transitionTime);
+            _packetHandlerManager.BroadcastPacket(transparent, Channel.CHL_S2C);
+        }
+
+        public void NotifyAttachMinimapIcon(IAttackableUnit unit, bool ChangeIcon, string IconCategory, bool ChangeBorder, string BorderCategory, string BorderScriptName)
+        {
+            var icon = new AttachMinimapIcon(unit, ChangeIcon, IconCategory, ChangeBorder, BorderCategory, BorderScriptName);
+            _packetHandlerManager.BroadcastPacket(icon, Channel.CHL_S2C);
         }
     }
 }

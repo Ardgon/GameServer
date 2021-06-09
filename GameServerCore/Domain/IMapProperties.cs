@@ -20,12 +20,17 @@ namespace GameServerCore.Domain
         void Init();
 
         Tuple<TeamId, Vector2> GetMinionSpawnPosition(string barracksName);
+        List<Vector2> GetMonsterSpawnPosition(MonsterSpawnType monsterType);
 
         void SetMinionStats(ILaneMinion m);
 
         Vector2 GetRespawnLocation(TeamId team);
 
         string GetMinionModel(TeamId team, MinionSpawnType type);
+
+        string GetMonsterModel(MonsterSpawnType type);
+
+        string GetBuffFor(IAttackableUnit u);
 
         float GetGoldFor(IAttackableUnit u);
 
@@ -34,5 +39,7 @@ namespace GameServerCore.Domain
         Vector3 GetEndGameCameraPosition(TeamId team);
 
         void HandleSurrender(int userId, IChampion who, bool vote);
+
+        void SpawnJungle();
     }
 }

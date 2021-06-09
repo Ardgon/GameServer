@@ -55,10 +55,10 @@ namespace LeagueSandbox.GameServer.Chatbox.Commands
 
             var minions = new[]
             {
-                new Minion(Game, null, championPos, casterModel, casterModel, 0, team),
-                new Minion(Game, null, championPos, cannonModel, cannonModel, 0, team),
-                new Minion(Game, null, championPos, meleeModel, meleeModel, 0, team),
-                new Minion(Game, null, championPos, superModel, superModel, 0, team)
+                new Minion(Game, null, championPos, casterModel, casterModel, 0, team, true),
+                new Minion(Game, null, championPos, cannonModel, cannonModel, 0, team, true),
+                new Minion(Game, null, championPos, meleeModel, meleeModel, 0, team, true),
+                new Minion(Game, null, championPos, superModel, superModel, 0, team, true)
             };
 
             const int X = 400;

@@ -334,9 +334,9 @@ namespace LeagueSandbox.GameServer.API
         /// <param name="isVisible">Whether or not this minion should be visible.</param>
         /// <param name="aiPaused">Whether or not this minion's AI is inactive.</param>
         /// <returns>New Minion instance.</returns>
-        public static IMinion AddMinion(IObjAiBase owner, string model, string name, Vector2 position, Vector2 facingDirection = new Vector2(), bool isVisible = true, bool aiPaused = true)
+        public static IMinion AddMinion(IObjAiBase owner, string model, string name, Vector2 position, Vector2 facingDirection = new Vector2(), bool isVisible = true, bool aiPaused = true, bool isWard = false)
         {
-            var m = new Minion(_game, owner, position, model, name, 0, owner.Team);
+            var m = new Minion(_game, owner, position, model, name, 0, owner.Team, isWard : isWard);
             _game.ObjectManager.AddObject(m);
             m.SetVisibleByTeam(owner.Team, isVisible);
             m.PauseAi(aiPaused);
@@ -559,7 +559,8 @@ namespace LeagueSandbox.GameServer.API
         /// <param name="obj">Object who's animations will be stopped.</param>
         /// <param name="animation">Internal name of the animation to stop playing. Set blank/null if stopAll is true.</param>
         /// <param name="stopAll">Whether or not to stop all animations. Only works if animation is empty/null.</param>
-        /// <param name="fade">Whether or not the animation should fade before stopping.</param>
+        /// <param name="fade">Whether or not the animation should fade before stop
+        /// .</param>
         /// <param name="ignoreLock">Whether or not locked animations should still be stopped.</param>
         public static void StopAnimation(IGameObject obj, string animation, bool stopAll = false, bool fade = false, bool ignoreLock = true)
         {

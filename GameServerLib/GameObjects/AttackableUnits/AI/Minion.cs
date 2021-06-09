@@ -25,12 +25,15 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
             string model,
             string name,
             uint netId = 0,
-            TeamId team = TeamId.TEAM_NEUTRAL
+            TeamId team = TeamId.TEAM_NEUTRAL,
+            bool isWard = false
         ) : base(game, model, new Stats.Stats(), 40, position, 1100, netId, team)
         {
             Name = name;
 
             Owner = owner;
+
+            IsWard = isWard;
 
             IsPet = false;
             if (Owner != null)
@@ -92,7 +95,7 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
         }
 
         // AI tasks
-        protected bool ScanForTargets()
+        public virtual bool ScanForTargets()
         {
             if(TargetUnit != null && !TargetUnit.IsDead)
             {
@@ -102,7 +105,9 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
             IAttackableUnit nextTarget = null;
             var nextTargetPriority = 14;
             var nearestObjects = _game.Map.CollisionHandler.QuadDynamic.GetNearestObjects(this);
+           
             //Find target closest to max attack range.
+
             foreach (var it in nearestObjects.OrderBy(x => Vector2.DistanceSquared(Position, x.Position) - (Stats.Range.Total * Stats.Range.Total)))
             {
                 if (!(it is IAttackableUnit u) ||

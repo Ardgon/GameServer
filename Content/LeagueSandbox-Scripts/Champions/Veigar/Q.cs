@@ -33,16 +33,17 @@ namespace Spells
         {
             ApiEventManager.OnSpellMissileHit.AddListener(this, new System.Collections.Generic.KeyValuePair<ISpell, IObjAiBase>(spell, owner), TargetExecute, false);
             Owner = owner;
-
+            Spell = spell;
+            prevKillCounter = owner.KillDeathCounter;
         }
 
         public void TargetExecute(ISpell spell, IAttackableUnit target, ISpellMissile missile)
         {
             var owner = spell.CastInfo.Owner as IChampion;
+
             var ownerSkinID = owner.Skin;
             var APratio = owner.Stats.AbilityPower.Total * 0.6f;
             var damage = 80f + ((spell.CastInfo.SpellLevel - 1) * 45) + APratio;
-            var StacksPerLevel = spell.CastInfo.SpellLevel;
 
             target.TakeDamage(owner, damage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_SPELL, false);
             if (ownerSkinID == 8)
@@ -56,20 +57,11 @@ namespace Spells
 
             if (target.IsDead)
             {
-                if (target is IChampion)
-                {
-                    var buffer = owner.Stats.AbilityPower.FlatBonus;
+                var buffer = owner.Stats.AbilityPower.FlatBonus;
 
-                    statsModifier.AbilityPower.FlatBonus = owner.Stats.AbilityPower.FlatBonus + (StacksPerLevel + 2) - buffer;
-                    owner.AddStatModifier(statsModifier);
-                }
-                else
-                {
-                    var buffer = owner.Stats.AbilityPower.FlatBonus;
+                statsModifier.AbilityPower.FlatBonus = owner.Stats.AbilityPower.FlatBonus + 1f - buffer;
+                owner.AddStatModifier(statsModifier);
 
-                    statsModifier.AbilityPower.FlatBonus = owner.Stats.AbilityPower.FlatBonus + 1f - buffer;
-                    owner.AddStatModifier(statsModifier);
-                }
                 if (ownerSkinID == 8)
                 {
                     AddParticleTarget(owner, owner, "Veigar_Skin08_Q_powerup.troy", owner, lifetime: 1f);
@@ -109,9 +101,24 @@ namespace Spells
         {
         }
 
+        float prevPassiveManaRegen = 0;
+        int prevKillCounter;
         public void OnUpdate(float diff)
         {
-            Owner.Stats.ManaRegeneration.FlatBonus = Owner.Stats.ManaRegeneration.BaseValue * ((100 / Owner.Stats.ManaPoints.Total) * ((Owner.Stats.ManaPoints.Total - Owner.Stats.CurrentMana) / 100));
+            if (prevPassiveManaRegen != 0)
+                Owner.Stats.ManaRegeneration.FlatBonus -= prevPassiveManaRegen;
+
+            var passiveManaRegen = Owner.Stats.ManaRegeneration.BaseValue * ((100 / Owner.Stats.ManaPoints.Total) * ((Owner.Stats.ManaPoints.Total - Owner.Stats.CurrentMana) / 100));
+            Owner.Stats.ManaRegeneration.FlatBonus += passiveManaRegen;
+
+            prevPassiveManaRegen = passiveManaRegen;
+
+            if (Owner.KillDeathCounter - prevKillCounter > 0)
+            {
+                Owner.Stats.AbilityPower.FlatBonus += Spell.CastInfo.SpellLevel;
+            }
+            prevKillCounter = Owner.KillDeathCounter;
         }
     }
 }
+ 

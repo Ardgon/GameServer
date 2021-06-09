@@ -33,10 +33,6 @@ namespace Spells
 
         public void OnSpellCast(ISpell spell)
         {
-        }
-
-        public void OnSpellPostCast(ISpell spell)
-        {
             var owner = spell.CastInfo.Owner;
             var APratio = owner.Stats.AbilityPower.Total * 0.3f;
             var HPratio = (owner.Stats.HealthPoints.Total - owner.Stats.HealthPoints.BaseValue) * 0.05f;
@@ -55,6 +51,10 @@ namespace Spells
             }
             AddParticleTarget(owner, owner, "Global_Heal.troy", owner, 1f);
             AddParticleTarget(owner, owner, "Imbue_glow.troy", owner, 1f, 0.2f);
+        }
+
+        public void OnSpellPostCast(ISpell spell)
+        {
         }
         public void OnSpellChannel(ISpell spell)
         {

@@ -6,6 +6,8 @@ using LeagueSandbox.GameServer.Scripting.CSharp;
 using GameServerCore.Domain.GameObjects.Spell;
 using GameServerCore.Domain.GameObjects.Spell.Missile;
 using GameServerCore.Scripting.CSharp;
+using LeagueSandbox.GameServer.API;
+using LeagueSandbox.GameServer.GameObjects.Spell;
 
 namespace Spells
 {
@@ -20,7 +22,8 @@ namespace Spells
         public void OnActivate(IObjAiBase owner, ISpell spell)
         {
             //TODO: Implement dash listeners
-            
+            _owner = owner;
+            _spell = spell;
         }
 
         public void OnDeactivate(IObjAiBase owner, ISpell spell)
@@ -36,6 +39,7 @@ namespace Spells
             var owner = spell.CastInfo.Owner;
             AddBuff("AkaliTwilightShroudCD", 0.65f, 1, spell, owner, owner);
             RemoveBuff(owner, "AkaliTwilightShroud");
+           
         }
 
         public void OnSpellPostCast(ISpell spell)
@@ -75,6 +79,7 @@ namespace Spells
                 target.TakeDamage(owner, MarkDamage, DamageType.DAMAGE_TYPE_MAGICAL, DamageSource.DAMAGE_SOURCE_PROC, false);
                 AddParticleTarget(owner, target, "akali_mark_impact_tar.troy", target, 1f);
                 RemoveBuff(target, "AkaliMota");
+                owner.Stats.CurrentMana += (15f + (5 * owner.GetSpell(0).CastInfo.SpellLevel));
             }
         }
 
@@ -90,8 +95,19 @@ namespace Spells
         {
         }
 
+        public IObjAiBase _owner;
+        public int prevKillCount = 0;
+        public ISpell _spell;
         public void OnUpdate(float diff)
         {
+            if (_owner.KillDeathCounter - prevKillCount > 0)
+            {
+                var spell = _spell as Spell;
+                spell.AddCurrentAmmo(_owner.KillDeathCounter - prevKillCount);
+            }
+
+            prevKillCount = _owner.KillDeathCounter;
+            
         }
     }
 }

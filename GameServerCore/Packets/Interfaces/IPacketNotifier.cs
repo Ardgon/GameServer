@@ -177,6 +177,16 @@ namespace GameServerCore.Packets.Interfaces
         /// <param name="totalCd">Amount of time that the spell should have be in cooldown before going off cooldown.</param>
         void NotifyCHAR_SetCooldown(IObjAiBase c, byte slotId, float currentCd, float totalCd);
         /// <summary>
+        /// Sends a packet to all players with vision of a specified ObjAiBase explaining that their specified spell's ammo has changed.
+        /// </summary>
+        /// <param name="u">ObjAiBase who owns the spell going on cooldown.</param>
+        /// <param name="slotId">Slot of the spell.</param>
+        /// <param name="currentAmmo">Amount of current ammo of the spell.</param>
+        /// <param name="maxAmmo">Amount of time the ammo has been recharging.</param>
+        /// /// <param name="ammoRechargeTotalTime">Amount of total time that the ammo should take to recharge.</param>
+        void S2C_AmmoUpdate(IObjAiBase u, byte slotId, int currentAmmo, int maxAmmo, float ammoRecharge, float ammoRechargeTotalTime);
+
+        /// <summary>
         /// Sends a packet to the specified user that highlights the specified GameObject.
         /// </summary>
         /// <param name="userId">ID of the user to send the packet to.</param>
@@ -876,6 +886,11 @@ namespace GameServerCore.Packets.Interfaces
         /// <param name="backDistance">Optional unknown parameter.</param>
         /// <param name="travelTime">Optional total time the dash will follow the GameObject before stopping or reaching the Target.</param>
         /// TODO: Implement ForceMovement class which houses these parameters, then have that as the only parameter to this function (and other Dash-based functions).
+
+        void NotifyTransparency(IAttackableUnit u, float transparency, float transitionTime);
+
+        void NotifyAttachMinimapIcon(IAttackableUnit unit, bool ChangeIcon, string IconCategory, bool ChangeBorder, string BorderCategory, string BorderScriptName);
+
         public void NotifyWaypointListWithSpeed
         (
             IAttackableUnit u,

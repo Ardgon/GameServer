@@ -53,8 +53,8 @@ namespace Spells
             isCrit = false;
             limiter = true;
 
-            AddParticle(Owner, Owner, "Karthus_Base_Q_Point.troy", coords, 1f);
-            AddParticle(Owner, Owner, "Karthus_Base_Q_Ring.troy", coords, 1f);
+            AddParticle(Owner, null, "Karthus_Base_Q_Point.troy", coords, 1f);
+            AddParticle(Owner, null, "Karthus_Base_Q_Ring.troy", coords, 1f);
         }
 
         public void OnSpellChannel(ISpell spell)
@@ -91,8 +91,8 @@ namespace Spells
                     }
 
                 }
-                AddParticle(Owner, Owner, "Karthus_Base_Q_Explosion.troy", coords, 1f, 0.75f); //Double Check the size
-                AddParticle(Owner, Owner, "Karthus_Base_Q_Explosion_Sound.troy", coords, 1f);
+                AddParticle(Owner, null, "Karthus_Base_Q_Explosion.troy", coords, 1f, 0.75f); //Double Check the size
+                AddParticle(Owner, null, "Karthus_Base_Q_Explosion_Sound.troy", coords, 1f);
                 limiter = false;       
                 //TODO: Fix Towers, inhibs, buildings, etc. causing Q to not Crit 
             }

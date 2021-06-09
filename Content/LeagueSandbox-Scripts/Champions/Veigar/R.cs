@@ -58,10 +58,6 @@ namespace Spells
             }
             else
             {
-                var buffer = owner.Stats.AbilityPower.FlatBonus;
-
-                statsModifier.AbilityPower.FlatBonus += (StacksPerLevel + 2) - buffer;
-                owner.AddStatModifier(statsModifier);
 
                 if (ownerSkinID == 8)
                 {

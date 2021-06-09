@@ -136,7 +136,7 @@ namespace PacketDefinitions420
 
                             waypoints = currentWaypoints.ConvertAll(v => Vector2ToWaypoint(TranslateToCenteredCoordinates(v, grid)));
                         }
-
+           
                         md = new MovementDataWithSpeed
                         {
                             SyncID = unit.SyncId,

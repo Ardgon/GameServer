@@ -22,7 +22,6 @@ namespace Spells
         public void OnActivate(IObjAiBase owner, ISpell spell)
         {
             ApiEventManager.OnSpellSectorHit.AddListener(this, new KeyValuePair<ISpell, IObjAiBase>(spell, owner), TargetExecute, false);
-            
         }
 
         public void OnDeactivate(IObjAiBase owner, ISpell spell)
@@ -53,23 +52,14 @@ namespace Spells
             AddParticle(owner, null, "akali_smoke_bomb_tar.troy", initialCastPos, 8f);
             AddParticle(owner, null, "akali_smoke_bomb_tar_team_green.troy", initialCastPos, 8f);
 
-            //owner.SetVisibleByTeam(TeamId.TEAM_PURPLE, false);
-            //owner.SetVisibleByTeam(TeamId.TEAM_BLUE, false);
-
-            //PrintChat(owner.IsVisibleByTeam(TeamId.TEAM_BLUE).ToString());
-
-            //var gibgame = owner as ObjAiBase;
-            //var game = gibgame._game as Game;
-            //var packet = game.PacketNotifier as PacketNotifier;
-            //packet.BeGone(TeamId.TEAM_PURPLE, owner, 0.0f, 0.0f);  //  ;  )))
-
+            //var point = GetPointFromUnit(owner, 250f);
+            //TeleportTo(owner, point.X, point.Y);
 
 
             /*
               TODO: Display green border (akali_smoke_bomb_tar_team_green.troy) for the own team,
               display red border (akali_smoke_bomb_tar_team_red.troy) for the enemy team
               Currently only displaying the green border for everyone.
-              -Add invisibility.
             */
 
             if (Shroud != null)

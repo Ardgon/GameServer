@@ -115,10 +115,9 @@ namespace GameServerCore.Domain.GameObjects
         /// <param name="isCrit">Whether or not the damage text should be shown as a crit.</param>
         void TakeDamage(IAttackableUnit attacker, float damage, DamageType type, DamageSource source, bool isCrit);
         /// <summary>
-        /// Whether or not this unit is currently calling for help. Unimplemented.
+        /// Whether or not this unit is currently calling for help.
         /// </summary>
         /// <returns>True/False.</returns>
-        /// TODO: Implement this.
         bool IsInDistress();
         /// <summary>
         /// Called when this unit dies.

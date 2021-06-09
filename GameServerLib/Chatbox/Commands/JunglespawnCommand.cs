@@ -18,8 +18,7 @@ namespace LeagueSandbox.GameServer.Chatbox.Commands
 
         public override void Execute(int userId, bool hasReceivedArguments, string arguments = "")
         {
-            _logger.Warn($"{ChatCommandManager.CommandStarterCharacter}{Command} command not implemented");
-            ChatCommandManager.SendDebugMsgFormatted(DebugMsgType.INFO, "Command not implemented");
+            Game.Map.MapProperties.SpawnJungle();
         }
     }
 }

@@ -86,7 +86,7 @@ namespace LeagueSandbox.GameServer.GameObjects
             var teams = Enum.GetValues(typeof(TeamId)).Cast<TeamId>();
             foreach (var t in teams)
             {
-                _visibleByTeam.Add(t, false);
+                _visibleByTeam.Add(t, true);
             }
 
             Team = team;
@@ -212,8 +212,10 @@ namespace LeagueSandbox.GameServer.GameObjects
             {
                 // Escape functionality should be moved to GameObject.OnCollision.
                 // only time we would collide with terrain is if we are inside of it, so we should teleport out of it.
-                Vector2 exit = _game.Map.NavigationGrid.GetClosestTerrainExit(Position, CollisionRadius + 1.0f);
-                TeleportTo(exit.X, exit.Y);
+                //Vector2 exit = _game.Map.NavigationGrid.GetClosestTerrainExit(Position, CollisionRadius + 1.0f);
+                //TeleportTo(exit.X, exit.Y);
+
+                // TODO: need to continue movement after teleporting out of terrain
             }
         }
 

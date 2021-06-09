@@ -201,7 +201,7 @@ namespace LeagueSandbox.GameServer.Content
         public bool IsValidTarget(IObjAiBase attacker, IAttackableUnit target, SpellDataFlags overrideFlags = 0)
         {
             var useFlags = Flags;
-
+            
             if (overrideFlags > 0)
             {
                 useFlags = overrideFlags;

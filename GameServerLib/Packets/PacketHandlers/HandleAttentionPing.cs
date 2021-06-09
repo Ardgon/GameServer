@@ -2,6 +2,7 @@
 using GameServerCore.Packets.Handlers;
 using GameServerCore.Packets.PacketDefinitions.Requests;
 using System.Numerics;
+//using static LeagueSandbox.GameServer.API.ApiFunctionManager;
 
 namespace LeagueSandbox.GameServer.Packets.PacketHandlers
 {
@@ -20,6 +21,7 @@ namespace LeagueSandbox.GameServer.Packets.PacketHandlers
         {
             var client = _playerManager.GetPeerInfo(userId);
             _game.PacketNotifier.NotifyPing(client, new Vector2(req.X, req.Y), req.TargetNetId, req.Type);
+            //PrintChat($"X - {req.X}, y - {req.Y}");
             return true;
         }
     }

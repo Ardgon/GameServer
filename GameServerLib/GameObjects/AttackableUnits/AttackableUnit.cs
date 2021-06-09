@@ -26,7 +26,7 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits
         private object _buffsLock;
 
         // Utility Vars.
-        internal const float DETECT_RANGE = 475.0f;
+        internal const float DETECT_RANGE = 800.0f;
         internal const int EXP_RANGE = 1400;
         protected readonly ILog Logger;
 
@@ -78,6 +78,10 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits
         /// TODO: Verify if we can remove this in favor of BuffSlots while keeping the functions which allow for easy accessing of individual buff instances.
         /// TODO: Move to AttackableUnit.
         private List<IBuff> BuffList { get; }
+        /// <summary>
+        /// Time in milliseconds unit last took damage.
+        /// </summary>
+        private float _lastAttackedTime;
         /// <summary>
         /// Waypoints that make up the path a game object is walking in.
         /// </summary>
@@ -232,9 +236,10 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits
                 var onCollide = _game.ScriptEngine.GetStaticMethod<Action<IAttackableUnit, IGameObject>>(Model, "Passive", "onCollide");
                 onCollide?.Invoke(this, collider);
 
+                // TODO: change to slide rather than tp
                 // Teleport out of other objects (+1 for insurance).
                 Vector2 exit = Extensions.GetCircleEscapePoint(Position, CollisionRadius + 1, collider.Position, collider.CollisionRadius);
-                TeleportTo(exit.X, exit.Y);
+                //TeleportTo(exit.X, exit.Y);
             }
         }
 
@@ -374,6 +379,7 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits
                 case DamageSource.DAMAGE_SOURCE_DEFAULT:
                     break;
                 case DamageSource.DAMAGE_SOURCE_SPELLAOE:
+                    regain = attackerStats.SpellVamp.Total * 0.33f;
                     break;
                 case DamageSource.DAMAGE_SOURCE_SPELLPERSIST:
                     break;
@@ -434,6 +440,8 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits
                 // TODO: send this in one place only (preferably a central EventHandler class)
                 _game.PacketNotifier.NotifyUpdatedStats(attacker, false);
             }
+
+            _lastAttackedTime = _game.GameTime;
         }
 
         /// <summary>
@@ -453,17 +461,18 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits
                 text = DamageResultType.RESULT_CRITICAL;
             }
 
+
             TakeDamage(attacker, damage, type, source, text);
         }
 
         /// <summary>
-        /// Whether or not this unit is currently calling for help. Unimplemented.
+        /// Whether or not this unit is currently calling for help.
         /// </summary>
         /// <returns>True/False.</returns>
         /// TODO: Implement this.
         public virtual bool IsInDistress()
         {
-            return false; //return DistressCause;
+            return _game.GameTime - _lastAttackedTime < 4f * 1000f; //return DistressCause;
         }
 
         /// <summary>
