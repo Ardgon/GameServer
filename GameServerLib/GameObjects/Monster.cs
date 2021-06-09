@@ -50,7 +50,7 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
             CampId = campId;
             CampUnk = campUnk;
             SpawnAnimationTime = spawnAnimationTime;
-            
+
 
             IsLaneMinion = false;
             _aiPaused = false;
@@ -108,7 +108,7 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
 
                 u.SetTargetUnit(source, true);
             }
-         }
+        }
 
         public override void OnAdded()
         {
@@ -123,10 +123,10 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
         bool resetting = false;
         public override bool AIMove()
         {
-      
+
             // TODO: Find better way of determining if position is stopped and reached spawn point
             if (resetting && IsPathEnded())
-            {                
+            {
                 resetting = false;
                 Stats.CurrentHealth = Stats.HealthPoints.Total;
                 return true;
@@ -139,19 +139,17 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
                 return false;
             }
 
+            if (Vector2.DistanceSquared(spawnPosition, Position) > chaseDistance * chaseDistance)
+            {
+                resetting = true;
+                CancelAutoAttack(false);
+                SetTargetUnit(null, true);
+                return false;
+            }
 
             //if (ScanForTargets()) // returns true if we have a target
             if (TargetUnit != null && !TargetUnit.IsDead) // returns true if we have a target
             {
-                // Target outside camp's chase distance
-                if (Vector2.DistanceSquared(spawnPosition, TargetUnit.Position) > chaseDistance * chaseDistance)
-                {
-                    CancelAutoAttack(false);
-                    resetting = true;
-                    SetTargetUnit(null, true);
-                    return false;
-                }
-
                 if (!RecalculateAttackPosition())
                 {
                     KeepFocusingTarget(); // attack/follow target
@@ -161,6 +159,6 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
             return true;
         }
 
-       
+
     }
 }

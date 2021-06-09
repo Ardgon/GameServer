@@ -31,7 +31,7 @@ namespace Spells
         {
             ApiEventManager.OnLaunchAttack.AddListener(this, owner, OnLaunchAttack, false);
 
-            
+
         }
 
         public void OnLaunchAttack(ISpell spell)
