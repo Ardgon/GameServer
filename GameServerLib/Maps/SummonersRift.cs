@@ -202,8 +202,7 @@ namespace LeagueSandbox.GameServer.Maps
         private readonly List<Inhibitor> _blueInhibitors = new List<Inhibitor>(3);
         private readonly List<Inhibitor> _purpleInhibitors = new List<Inhibitor>(3);
 
-        private Monster[] _jungleMonsters = new Monster[34];
-        private long[] _jungleMonstersNextSpawnTime = new long[34];
+        private List<MonsterCamp> _monsterCamps = new List<MonsterCamp>();
 
         private Nexus _blueNexus;
         private Nexus _purpleNexus;
@@ -251,11 +250,6 @@ namespace LeagueSandbox.GameServer.Maps
             var nexusRadius = 353;
             var sightRange = 1700;
 
-            // NEUTRAL TEAM
-            for(int i=0; i < _jungleMonstersNextSpawnTime.Length; i++)
-            {
-                _jungleMonstersNextSpawnTime[i] = _jungleSpawnTime;
-            }
 
             //BLUE TEAM
             // Outer top - mid - bot turrets
@@ -382,6 +376,26 @@ namespace LeagueSandbox.GameServer.Maps
 
             _game.ObjectManager.AddObject(_blueNexus);
             _game.ObjectManager.AddObject(_purpleNexus);
+
+            // TODO: unhardcode monster positions
+            _monsterCamps = new List<MonsterCamp>() {
+                new MonsterCamp(_game, MonsterCampType.BARON, new Vector2(4531.5f, 10193.7f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_BARON }, new List<Vector2>() { new Vector2(4591.434f, 10215.344f)}, 420),
+                new MonsterCamp(_game, MonsterCampType.DRAGON, new Vector2(9532.6f, 4264f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_DRAGON }, new List<Vector2>() { new Vector2(9430.364f, 4184.46f)}, 360),
+
+                new MonsterCamp(_game, MonsterCampType.BLUE_GOLEMS, new Vector2(8002.5938f, 2272.772f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_GOLEM, MonsterSpawnType.MINION_TYPE_LESSER_GOLEM }, new List<Vector2>() { new Vector2(7903f, 2478f), new Vector2(8116f, 2492f) }, 50),
+                new MonsterCamp(_game, MonsterCampType.BLUE_ANCIENT_GOLEM, new Vector2(3450f, 7722f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_ANCIENT_GOLEM, MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ANCIENT, MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ANCIENT }, new List<Vector2>() { new Vector2(3556f, 7643f), new Vector2(3335f, 7605f), new Vector2(3469f, 7825f) }, 300),
+                new MonsterCamp(_game, MonsterCampType.BLUE_WRAITHS, new Vector2(6536.759f, 5235.117f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_WRAITH, MonsterSpawnType.MINION_TYPE_LESSER_WRAITH, MonsterSpawnType.MINION_TYPE_LESSER_WRAITH, MonsterSpawnType.MINION_TYPE_LESSER_WRAITH }, new List<Vector2>() { new Vector2(6439f, 5220f), new Vector2(6622f, 5283f), new Vector2(6493f, 5134f), new Vector2(6651f, 5169f) }, 50),
+                new MonsterCamp(_game, MonsterCampType.BLUE_WOLVES, new Vector2(3353f, 6163f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_GIANT_WOLF, MonsterSpawnType.MINION_TYPE_WOLF, MonsterSpawnType.MINION_TYPE_WOLF }, new List<Vector2>() { new Vector2(3373f, 6208f), new Vector2(3339f, 6365f), new Vector2(3516f, 6192f) }, 50),
+                new MonsterCamp(_game, MonsterCampType.BLUE_LIZARD_ELDER, new Vector2(7384f, 3844f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_ELDER_LIZARD, MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ELDER, MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ELDER }, new List<Vector2>() { new Vector2(7450f, 3897f), new Vector2(7254f, 3885f), new Vector2(7473f, 3708f) }, 300),
+                new MonsterCamp(_game, MonsterCampType.BLUE_GROMP, new Vector2(1982.3355f, 8250.126f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_GROMP }, new List<Vector2>() { new Vector2(1820.6832f, 8176.1597f) }, 50),
+
+                new MonsterCamp(_game, MonsterCampType.RED_GOLEMS, new Vector2(5981.8f, 11976.6f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_GOLEM, MonsterSpawnType.MINION_TYPE_LESSER_GOLEM }, new List<Vector2>() { new Vector2(6055.785f, 11905.778f), new Vector2(5879.59f, 11880.846f)}, 50),
+                new MonsterCamp(_game, MonsterCampType.RED_ANCIENT_GOLEM, new Vector2(10584.8f, 6720.3f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_ANCIENT_GOLEM, MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ANCIENT, MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ANCIENT }, new List<Vector2>() { new Vector2(10493.184f, 6763.5405f), new Vector2(10654.244f, 6821.699f), new Vector2(10525.28f, 6662.5273f) }, 300),
+                new MonsterCamp(_game, MonsterCampType.RED_WRAITHS, new Vector2(7453.7f, 9239.1f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_WRAITH, MonsterSpawnType.MINION_TYPE_LESSER_WRAITH, MonsterSpawnType.MINION_TYPE_LESSER_WRAITH, MonsterSpawnType.MINION_TYPE_LESSER_WRAITH }, new List<Vector2>() { new Vector2(7562.0127f, 9189.633f), new Vector2(7419.434f, 9111.344f), new Vector2(7361.434f, 9261.344f), new Vector2(7538.852f, 9307.1455f) }, 50),
+                new MonsterCamp(_game, MonsterCampType.RED_WOLVES, new Vector2(10666.2f, 8213.46f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_GIANT_WOLF, MonsterSpawnType.MINION_TYPE_WOLF, MonsterSpawnType.MINION_TYPE_WOLF }, new List<Vector2>() { new Vector2(10630.8f, 8164.3228f), new Vector2(10505.131f, 8224.73f), new Vector2(10684.68f, 8089.6265f) }, 50),
+                new MonsterCamp(_game, MonsterCampType.RED_LIZARD_ELDER, new Vector2(6652.7f, 10654.1f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_ELDER_LIZARD, MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ANCIENT, MonsterSpawnType.MINION_TYPE_YOUNG_LIZARD_ANCIENT }, new List<Vector2>() { new Vector2(6523.898f, 10504.402f), new Vector2(6736.2334f, 10514.005f), new Vector2(6549.071f, 10735.53f) }, 300),
+                new MonsterCamp(_game, MonsterCampType.RED_GROMP, new Vector2(12142.5f, 6186.6f), new List<MonsterSpawnType>() { MonsterSpawnType.MINION_TYPE_GROMP }, new List<Vector2>() { new Vector2(12191.434f, 6213.3438f) }, 50)
+            };
         }
 
         public void Update(float diff)
@@ -414,32 +428,24 @@ namespace LeagueSandbox.GameServer.Maps
                     _minionNumber++;
                 }
 
-                if (_jungleSpawnTime != 0 && _game.GameTime >= _jungleSpawnTime)
-                {
-                    SpawnJungle();
-                    _jungleSpawnTime = 0;
-                }
 
-
-                // TODO: SET RESPAWN TIME ON DEATH
-                for (int i = 0; i < _jungleMonsters.Length; i++)
+                if (_game.GameTime >= _jungleSpawnTime)
                 {
-                    if (_jungleMonsters[i] != null && !_jungleMonsters[i].IsDead)
-                        _jungleMonstersNextSpawnTime[i] = (long)_game.GameTime + GetMonsterSpawnInterval(GetMonsterFromIndex(i).Item1);                    
-                }
-
-                for (int i=0; i < _jungleMonstersNextSpawnTime.Length; i++)
-                {
-                    if (_game.GameTime >= _jungleMonstersNextSpawnTime[i])
+                    if (_jungleSpawnTime != 0)
                     {
-                        if (_jungleMonsters[i] != null && !_jungleMonsters[i].IsDead)
-                            continue;
+                        SpawnJungle();
+                        _jungleSpawnTime = 0;
+                    }
 
-                        var monster = GetMonsterFromIndex(i);
-                        SpawnMonster(monster.Item1, monster.Item2, i);
-                        //_jungleMonstersNextSpawnTime[i] = (long)_game.GameTime + GetMonsterSpawnInterval(monster.Item1);
+                    foreach (var camp in _monsterCamps)
+                    {
+                        if (!camp.IsAlive() && _game.GameTime >= camp.NextSpawnTime)
+                        {
+                            camp.Spawn();
+                        }
                     }
                 }
+
             }
 
             foreach (var fountain in _fountains.Values)
@@ -817,37 +823,11 @@ namespace LeagueSandbox.GameServer.Maps
             _game.ObjectManager.AddObject(m);
         }
 
-        // TODO: Add monster facing position
-        public void SpawnMonster(MonsterSpawnType monsterType, Vector2 position, int monsterIndex)
-        {
-            var m = new Monster(
-                _game,
-                position,
-                position,
-                monsterType,
-                GetMonsterModel(monsterType),
-                GetMonsterModel(monsterType)
-            );
-
-            _game.ObjectManager.AddObject(m);
-            _jungleMonsters[monsterIndex] = m;
-        }
-
         public void SpawnJungle()
         {
-            int i = 0;
-            foreach (MonsterSpawnType monsterType in Enum.GetValues(typeof(MonsterSpawnType)))
+            foreach (var camp in _monsterCamps)
             {
-                foreach (Vector2 pos in GetMonsterSpawnPosition(monsterType))
-                {
-                    if (_jungleMonsters[i] != null && !_jungleMonsters[i].IsDead)
-                    {
-                        i++;
-                        continue;
-                    }
-                    SpawnMonster(monsterType, pos, i);
-                    i++;
-                }
+                camp.Spawn();
             }
         }
 

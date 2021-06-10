@@ -15,7 +15,7 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
     {
         public Vector2 Facing { get; private set; }
         public string SpawnAnimation { get; private set; }
-        public byte CampId { get; private set; }
+        public MonsterCampType CampId { get; private set; }
         public byte CampUnk { get; private set; }
         public float SpawnAnimationTime { get; private set; }
 
@@ -30,8 +30,8 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
             MonsterSpawnType spawnType,
             string model,
             string name,
+            MonsterCampType campId,
             string spawnAnimation = "",
-            byte campId = 0x01,
             byte campUnk = 0x2A,
             float spawnAnimationTime = 0.0f,
             uint netId = 0
@@ -69,14 +69,8 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
                 //AddParticleTarget(this, this, "NeutralMonster_buf_blue_defense_big.troy", this);
             }
 
-            //var spawnSpecifics = _game.Map.MapProperties.GetMonsterSpawnPosition(MinionSpawnType);
-            //SetPosition(spawnSpecifics.Item2.X, spawnSpecifics.Item2.Y);
-            //SetPosition(spawnSpecifics.Item2.X, spawnSpecifics.Item2.Y);
-
             SetPosition(position.X, position.Y);
             chaseDistance = 800;  // TODO: unhardcode
-
-            //_game.Map.MapProperties.SetMonsterStats(this); // Let the map decide how strong this minion has to be.
 
             StopMovement();
 
@@ -147,7 +141,6 @@ namespace LeagueSandbox.GameServer.GameObjects.AttackableUnits.AI
                 return false;
             }
 
-            //if (ScanForTargets()) // returns true if we have a target
             if (TargetUnit != null && !TargetUnit.IsDead) // returns true if we have a target
             {
                 if (!RecalculateAttackPosition())

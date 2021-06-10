@@ -886,11 +886,6 @@ namespace GameServerCore.Packets.Interfaces
         /// <param name="backDistance">Optional unknown parameter.</param>
         /// <param name="travelTime">Optional total time the dash will follow the GameObject before stopping or reaching the Target.</param>
         /// TODO: Implement ForceMovement class which houses these parameters, then have that as the only parameter to this function (and other Dash-based functions).
-
-        void NotifyTransparency(IAttackableUnit u, float transparency, float transitionTime);
-
-        void NotifyAttachMinimapIcon(IAttackableUnit unit, bool ChangeIcon, string IconCategory, bool ChangeBorder, string BorderCategory, string BorderScriptName);
-
         public void NotifyWaypointListWithSpeed
         (
             IAttackableUnit u,
@@ -902,5 +897,10 @@ namespace GameServerCore.Packets.Interfaces
             float backDistance = 0,
             float travelTime = 0
         );
+
+
+        void NotifyTransparency(IAttackableUnit u, float transparency, float transitionTime);
+        void NotifyCreateMonsterCamp(Vector2 pos, byte campId, TeamId team, string icon);
+        void NotifyMonsterCampEmpty(IMonsterCamp monsterCamp, IChampion killer);
     }
 }

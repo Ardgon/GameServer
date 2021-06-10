@@ -38,7 +38,7 @@ namespace PacketDefinitions420.PacketDefinitions.S2C
 
             Write((int)m.Team); // Probably a short
             Fill(0, 12);
-            Write(1); //campId 1
+            Write((int)m.CampId); //campId 1
             Write(100);
             Write(74);
             Write((long)1);

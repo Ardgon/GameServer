@@ -8,7 +8,7 @@ namespace GameServerCore.Domain.GameObjects
         Vector2 Facing { get; }
         string Name { get; }
         string SpawnAnimation { get; }
-        byte CampId { get; }
+        MonsterCampType CampId { get; }
         byte CampUnk { get; }
         float SpawnAnimationTime { get; }
 

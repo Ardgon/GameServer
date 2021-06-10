@@ -2945,10 +2945,20 @@ namespace PacketDefinitions420
             _packetHandlerManager.BroadcastPacket(transparent, Channel.CHL_S2C);
         }
 
-        public void NotifyAttachMinimapIcon(IAttackableUnit unit, bool ChangeIcon, string IconCategory, bool ChangeBorder, string BorderCategory, string BorderScriptName)
+        public void NotifyCreateMonsterCamp(Vector2 pos, byte campId, TeamId team, string icon)
         {
-            var icon = new AttachMinimapIcon(unit, ChangeIcon, IconCategory, ChangeBorder, BorderCategory, BorderScriptName);
-            _packetHandlerManager.BroadcastPacket(icon, Channel.CHL_S2C);
+            var Z = _navGrid.GetHeightAtLocation(pos);
+
+            var camp = new CreateMonsterCamp(pos.X, pos.Y, Z, icon, campId, 0, 0);
+            _packetHandlerManager.BroadcastPacket(camp.GetBytes(), Channel.CHL_S2C);
         }
+
+        // TODO: Send to team of killer and enemy team if they have vision of the monster camp rather than everyone.
+        public void NotifyMonsterCampEmpty(IMonsterCamp monsterCamp, IChampion killer)
+        {
+            var emptyCamp = new NeutralCampEmpty(monsterCamp, killer);
+            _packetHandlerManager.BroadcastPacket(emptyCamp.GetBytes(), Channel.CHL_S2C);
+        }
+
     }
 }

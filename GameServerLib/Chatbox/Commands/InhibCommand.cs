@@ -41,7 +41,8 @@ namespace LeagueSandbox.GameServer.Chatbox.Commands
                     sender.Champion.Position,
                     monsterType,
                     split[1],
-                    split[1]
+                    split[1],
+                    MonsterCampType.BARON
                 );
                 Game.ObjectManager.AddObject(m);
             } catch (Exception e) {

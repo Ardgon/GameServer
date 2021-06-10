@@ -131,6 +131,7 @@
         // Packet 0xC0 format is [Net ID 1] [Net ID 2], purpose still unknown
         PKT_S2C_GAME_TIMER = 0xC1,
         PKT_S2C_GAME_TIMER_UPDATE = 0xC2,
+        PKT_S2C_NEUTRAL_CAMP_EMPTY = 0xC3,
         PKT_S2C_CHAR_STATS = 0xC4,
         PKT_S2C_GAME_END = 0xC6,
         PKT_S2C_SURRENDER = 0xC9,

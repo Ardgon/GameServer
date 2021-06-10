@@ -16,4 +16,22 @@
         MINION_TYPE_WRAITH = 0x0B,
         MINION_TYPE_LESSER_WRAITH = 0x0C,
     }
+
+    public enum MonsterCampType : byte
+    {
+        BLUE_GOLEMS = 0x00,
+        BLUE_ANCIENT_GOLEM = 0x01,
+        BLUE_WRAITHS = 0x02,
+        BLUE_WOLVES = 0x03,
+        BLUE_LIZARD_ELDER = 0x04,
+        BLUE_GROMP = 0x05,
+        RED_GOLEMS = 0x06,
+        RED_ANCIENT_GOLEM = 0x07,
+        RED_WRAITHS = 0x08,
+        RED_WOLVES = 0x09,
+        RED_LIZARD_ELDER = 0x0A,
+        RED_GROMP = 0x0B,
+        DRAGON = 0x0C,
+        BARON = 0x0D,
+    }
 }
