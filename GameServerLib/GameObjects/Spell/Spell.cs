@@ -1149,7 +1149,7 @@ namespace LeagueSandbox.GameServer.GameObjects.Spell
             }
 
             CurrentAmmoRechargeTime -= diff / 1000.0f;
-            CurrentAmmoRechargeTime = Math.Clamp(CurrentAmmoRechargeTime, 0, GetAmmoRechargeTime());
+            CurrentAmmoRechargeTime = Math.Max(CurrentAmmoRechargeTime, 0);
 
             if (CurrentAmmo < GetMaxAmmo() && CurrentAmmoRechargeTime == 0)
             {
