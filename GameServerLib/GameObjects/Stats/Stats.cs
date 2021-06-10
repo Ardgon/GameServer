@@ -216,7 +216,7 @@ namespace LeagueSandbox.GameServer.GameObjects.Stats
 
             HealthPoints.BaseValue += HealthPerLevel;
             CurrentHealth = HealthPoints.Total / (HealthPoints.Total - HealthPerLevel) * CurrentHealth;
-            ManaPoints.BaseValue = ManaPoints.Total + ManaPerLevel;
+            ManaPoints.BaseValue += ManaPerLevel;
             CurrentMana = ManaPoints.Total / (ManaPoints.Total - ManaPerLevel) * CurrentMana;
             AttackDamage.BaseValue += AdPerLevel;
             Armor.BaseValue += ArmorPerLevel;
